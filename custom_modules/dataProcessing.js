@@ -47,4 +47,4 @@ var recordVisit = function(eventToListen, visitDuration, accountName) {
 };
 
 
-exports.getNumOfActiveVisitorsForWebsite = getNumOfActiveVisitorsForWebsite;
+exports.getNumOfActiveVisitors = getNumOfActiveVisitors;
