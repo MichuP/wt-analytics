@@ -2,7 +2,7 @@ var express = require('express');
 var app = express.createServer();
 var socket = require('socket.io');
 var io = socket.listen(app);
-
+var fs = require('fs');
 
 var //global settings
 	visitDuration,
@@ -11,18 +11,17 @@ var //global settings
 	trackingObject = {};
 
 //utils
-var addActiveVisitor = function(visitorID) {
-	visitorsActiveOnWebsite.push(visitorID);
-};
-
-var removeInactiveVisitor = function(visitorID) {
-	var index = visitorsActiveOnWebsite.indexOf(visitorID);
-	visitorsActiveOnWebsite.splice(index, 1);
+var storeVisitLog = function(directory, fileName, fileContents) {
+	fs.writeFile(directory + fileName, fileContents, function (err,data) {
+  		if (err) {
+  	 		return console.log(err);
+  		}
+  	});
 };
 
 // function to calculate timestamp differences 
-function calculateTimestampDifference(date1, date2, maxAllowedMinutesDifference){
-	var oneMinute = 1000 * 60;
+var calculateTimestampDifference = function(date1, date2, maxAllowedMinutesDifference){
+	var oneMinute = 60*1000;
 	var date1Miliseconds = date1.getTime();
 	var date2Miliseconds = date2.getTime();
 	var milisecondsDifference = date2Miliseconds - date1Miliseconds;
@@ -35,16 +34,47 @@ function calculateTimestampDifference(date1, date2, maxAllowedMinutesDifference)
 	}
 };
 
+var addActiveVisitor = function(visitorID) {
+	if (!visitorsActiveOnWebsite.indexOf(visitorID) > -1) {
+		visitorsActiveOnWebsite.push(visitorID);
+	}
+};
+
+// function to remove inactive visitors
+var removeInactiveVisitors = function() {
+	var lastUserActivityIndex,
+		lastUserActivityData,
+		timeNow,
+		index,
+		directory,
+		fileName;
+	
+	for (var property in trackingObject) {
+		timeNow = new Date();
+		lastUserActivityIndex = property['journey'].length - 1;
+		lastUserActivityData = property['journey'][lastUserActivityIndex];
+		if (calculateTimestampDifference(lastUserActivityData.time, timeNow, visitDuration)) {
+			index = visitorsActiveOnWebsite.indexOf(lastUserActivityData.vid);
+			visitorsActiveOnWebsite.splice(index, 1);
+			//before removing visitor data from trackingObject, save visitor activity in a file
+			directory = '/trackingData/' + lastUserActivityData.vid;
+			if (!fs.existsSync(directory)) {
+    			fs.mkdir(directory, function(err) {
+    				console.log(err);
+    			});	
+			}
+			fileName = '/' + lastUserActivityData.vid + ' ' + lastUserActivityData.time.getTime() + '.txt';
+			storeVisitLog(directory, fileName, JSON.stringify(lastUserActivityData));
+			delete trackingObject[property];
+		}
+	};
+};
+
+var clearTrackingObject = setInterval(removeInactiveVisitors, 60*1000);
 //data processing methods
 var recordUserActivities = function(accountName) {
-	/* eventToListen - clientSide emits pageData (and in future others) events. This in theory could be changed to any other event name. This method listens to a parameter
-	 * passed here. In future this might be an options object, which will pass an array of multiple events - trackLinks, customEvents, etc.
-	 * 
-	 * visitDuration - allows to set the time period in mins, after which, in case of user inactivity, the visit will be ended
-	 * 
-	 * acountName - ingore requests that are coming from hostnames other then specified in accountName
+	/* acountName - ingore requests that are coming from hostnames other then specified in accountName
 	 * */
-	
 	// on client connect, check active Vis array, if not there add to array and append data to the tracking object. Object format similar to:
 	// { visitorID = val,
 	//   visJourney = Array of PageData objects (in future other tracking)
@@ -52,7 +82,17 @@ var recordUserActivities = function(accountName) {
 	//   ?? visitDuration }
 	io.sockets.on('connection', function(client) {
 		client.on('sendPageData', function(pageData) {
-			
+			addActiveVisitor(pageData.vid);
+			if (trackingObject.hasOwnProperty(pageData.vid)) {
+				trackingObject[pageData.vid]['currentPage'] = pageData.url;
+				trackingObject[pageData.vid]['journey'].push(pageData);
+			}
+			else {
+				trackingObject[pageData.vid] = {
+					journey: [pageData],
+					currentPage : pageData.url
+				};
+			}
 		});
 		
 		
