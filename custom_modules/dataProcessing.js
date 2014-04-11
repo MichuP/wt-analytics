@@ -1,7 +1,4 @@
-var express = require('express');
-var app = express.createServer();
 var socket = require('socket.io');
-var io = socket.listen(app);
 var fs = require('fs');
 
 var //global settings
@@ -70,9 +67,11 @@ var removeInactiveVisitors = function() {
 	};
 };
 
-var clearTrackingObject = setInterval(removeInactiveVisitors, 60*1000);
+var clearTrackingObject =  function(timeIntervalForProcessing) {
+	setInterval(removeInactiveVisitors, timeIntervalForProcessing * 1000);
+};
 //data processing methods
-var recordUserActivities = function(accountName) {
+var recordUserActivities = function(server) {
 	/* acountName - ingore requests that are coming from hostnames other then specified in accountName
 	 * */
 	// on client connect, check active Vis array, if not there add to array and append data to the tracking object. Object format similar to:
@@ -80,6 +79,7 @@ var recordUserActivities = function(accountName) {
 	//   visJourney = Array of PageData objects (in future other tracking)
 	//   currentPage = val,
 	//   ?? visitDuration }
+	var io = socket.listen(server);
 	io.sockets.on('connection', function(client) {
 		client.on('sendPageData', function(pageData) {
 			addActiveVisitor(pageData.vid);
@@ -121,16 +121,13 @@ var getTrackingObject = function() {
 };
 
 //setters
-function setServerPortForApp(server) {
-	app.listen(server);
-}
-
 function setVisitDuration(timeInMinutes) {
-	visitDuration = timeInMinutes;
+	visitDuration = timeInMinutes * 60 * 1000;
 }
 
 exports.getNumOfActiveVisitors = getNumOfActiveVisitors;
 exports.getTrackingObject = getTrackingObject;
+exports.listenToVisitorActivities = recordUserActivities;
+exports.clearTrackingObject = clearTrackingObject;
 //settings
-exports.appListenOn = setServerPortForApp;
 exports.setVisitDuration = setVisitDuration;
