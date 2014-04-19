@@ -1,7 +1,7 @@
 var socket = io.connect();
 var wt = (function($, doc, socket) {
 	
-	var vistorId = getCookie('wt_vi') || createVisitorCookie();
+	var visitorId = getCookie('wt_vid') || createVisitorCookie();
 	
 	var browserInfo = {
 		name : navigator.userAgent,
@@ -48,8 +48,8 @@ var wt = (function($, doc, socket) {
     		for( var i=0; i < 8; i++ )
         		text += possible.charAt(Math.floor(Math.random() * possible.length));
 			var date = new Date;
-			var visCookie = text+date;
-			setCookie(wt_vid, visCookie, 1461);
+			var visCookie = text+'_'+date.getTime();
+			setCookie('wt_vid', visCookie, 1461);
 			return visCookie;
 	}
 
@@ -91,7 +91,7 @@ var wt = (function($, doc, socket) {
 			url: URLInfo.url,
 			pn: URLInfo.pagename,
 			rf: URLInfo.referer,
-			vid: vistorId,
+			vid: visitorId,
 			time: new Date()
 		};		
 		socket.emit('sendPageData', pageData);

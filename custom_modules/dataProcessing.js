@@ -8,8 +8,13 @@ var //global settings
 	trackingObject = {};
 
 //utils
-var storeVisitLog = function(directory, fileName, fileContents) {
-	fs.writeFile(directory + fileName, fileContents, function (err,data) {
+var storeVisitLog = function(directory, fileName, contents) {
+	var fileString;
+	contents.forEach(function(jsonObject) {
+		fileString = fileString + '|' + JSON.stringify(jsonObject);
+	});
+
+	fs.writeFile(directory + fileName, fileString.substring(10), function (err,data) {
   		if (err) {
   	 		return console.log(err);
   		}
@@ -23,7 +28,7 @@ var calculateTimestampDifference = function(date1, date2, maxAllowedMinutesDiffe
 	var date2Miliseconds = date2.getTime();
 	var milisecondsDifference = date2Miliseconds - date1Miliseconds;
 	var minutesDifference = Math.round(milisecondsDifference / oneMinute);
-	if (minutesDifference > maxAllowedMinutesDifference) {
+	if (minutesDifference >= maxAllowedMinutesDifference) {
 		return true;
 	}
 	else {
@@ -46,22 +51,24 @@ var removeInactiveVisitors = function() {
 		directory,
 		fileName;
 	
-	for (var property in trackingObject) {
+	for (var property in trackingObject) {		
 		timeNow = new Date();
-		lastUserActivityIndex = property['journey'].length - 1;
-		lastUserActivityData = property['journey'][lastUserActivityIndex];
-		if (calculateTimestampDifference(lastUserActivityData.time, timeNow, visitDuration)) {
+		lastUserActivityIndex = trackingObject[property]['journey'].length - 1;
+		lastUserActivityData = trackingObject[property]['journey'][lastUserActivityIndex];
+		console.log(new Date(lastUserActivityData.time) + "  date now:  " + timeNow + "   visit duration:  " + visitDuration);
+		if (calculateTimestampDifference(new Date (lastUserActivityData.time), timeNow, visitDuration)) {
 			index = visitorsActiveOnWebsite.indexOf(lastUserActivityData.vid);
 			visitorsActiveOnWebsite.splice(index, 1);
 			//before removing visitor data from trackingObject, save visitor activity in a file
-			directory = '/trackingData/' + lastUserActivityData.vid;
+			directory = 'trackingData/' + lastUserActivityData.vid;
 			if (!fs.existsSync(directory)) {
+    			console.log('creating directory for user');
     			fs.mkdir(directory, function(err) {
     				console.log(err);
     			});	
 			}
-			fileName = '/' + lastUserActivityData.vid + ' ' + lastUserActivityData.time.getTime() + '.txt';
-			storeVisitLog(directory, fileName, JSON.stringify(lastUserActivityData));
+			fileName = '/' + lastUserActivityData.vid + '_' + new Date(lastUserActivityData.time).getTime() + '.txt';
+			storeVisitLog(directory, fileName, trackingObject[lastUserActivityData.vid]['journey']);
 			delete trackingObject[property];
 		}
 	};
@@ -86,12 +93,14 @@ var recordUserActivities = function(server) {
 			if (trackingObject.hasOwnProperty(pageData.vid)) {
 				trackingObject[pageData.vid]['currentPage'] = pageData.url;
 				trackingObject[pageData.vid]['journey'].push(pageData);
+				console.log(trackingObject);
 			}
 			else {
 				trackingObject[pageData.vid] = {
 					journey: [pageData],
 					currentPage : pageData.url
 				};
+				console.log(trackingObject);
 			}
 		});
 		
@@ -122,7 +131,7 @@ var getTrackingObject = function() {
 
 //setters
 function setVisitDuration(timeInMinutes) {
-	visitDuration = timeInMinutes * 60 * 1000;
+	visitDuration = timeInMinutes;
 }
 
 exports.getNumOfActiveVisitors = getNumOfActiveVisitors;
