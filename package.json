@@ -1,10 +1,14 @@
 {
-	"name": "",
-	"version": "0.0.1",
-	"description": "custom web analytics app",
-	"dependencies": {
-		"socket.io": "~0.9.6",
-		"mime": "~1.2.7",
-		"express": "3.x"
-	}
+  "name": "",
+  "version": "0.0.1",
+  "description": "custom web analytics app",
+  "private": true,
+  "dependencies": {
+    "socket.io": "~0.9.6",
+    "mime": "~1.2.7",
+    "express": "3.x",
+    "ejs": "^1.0.0",
+    "mongodb": "*",
+    "mongoose"   : "3.8.x"
+  }
 }

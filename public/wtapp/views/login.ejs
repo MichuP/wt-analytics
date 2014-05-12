@@ -1,0 +1,32 @@
+<HTML>
+	<HEAD>
+		<TITLE>Web tracking login</TITLE>
+		<script src="/wtapp/javascript/jQuery.js"></script>
+	</HEAD>
+	<BODY BGCOLOR="FFFFFF">
+		<%if (authenticated == false ) { %>
+
+		<form method="post" action="/wtapp/visitor">
+			<p>
+				<input type="text" name="login" value="" placeholder="Email">
+			</p>
+			<p>
+				<input type="password" name="password" value="" placeholder="Password">
+			</p>
+			<p class="remember_me">
+				<label>
+					<input type="checkbox" name="remember_me" id="remember_me">
+					Remember me on this computer </label>
+			</p>
+			<p class="submit">
+				<input type="submit" name="commit" value="Login">
+			</p>
+		</form>
+		<% } %>
+		
+		<%if (authenticated == true ) { %>
+			Hi <%=login %>! Go to <a href="/wtapp/index">WebTracker homepage</a> to get started!	
+		<% } %>
+			
+	</BODY>
+</HTML>

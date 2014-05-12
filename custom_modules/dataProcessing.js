@@ -55,7 +55,7 @@ var removeInactiveVisitors = function() {
 		timeNow = new Date();
 		lastUserActivityIndex = trackingObject[property]['journey'].length - 1;
 		lastUserActivityData = trackingObject[property]['journey'][lastUserActivityIndex];
-		console.log(new Date(lastUserActivityData.time) + "  date now:  " + timeNow + "   visit duration:  " + visitDuration);
+		//console.log(new Date(lastUserActivityData.time) + "  date now:  " + timeNow + "   visit duration:  " + visitDuration);
 		if (calculateTimestampDifference(new Date (lastUserActivityData.time), timeNow, visitDuration)) {
 			index = visitorsActiveOnWebsite.indexOf(lastUserActivityData.vid);
 			visitorsActiveOnWebsite.splice(index, 1);
@@ -93,14 +93,16 @@ var recordUserActivities = function(server) {
 			if (trackingObject.hasOwnProperty(pageData.vid)) {
 				trackingObject[pageData.vid]['currentPage'] = pageData.url;
 				trackingObject[pageData.vid]['journey'].push(pageData);
+				trackingObject[pageData.vid]['pagesViewed'] = trackingObject[pageData.vid]['pagesViewed'] + 1;
 				console.log(trackingObject);
 			}
 			else {
 				trackingObject[pageData.vid] = {
 					journey: [pageData],
-					currentPage : pageData.url
+					currentPage: pageData.url,
+					pagesViewed: 1
 				};
-				console.log(trackingObject);
+				//console.log(trackingObject);
 			}
 		});
 		
@@ -125,6 +127,22 @@ var getActiveVisitors = function() {
 	return visitorsActiveOnWebsite;
 };
 
+var getTotalNumberOfPagesViewed = function() {
+	var totalPagesViewed = 0;
+	for (var property in trackingObject) {
+		totalPagesViewed = totalPagesViewed + trackingObject[property]['pagesViewed'];
+	};	
+	return totalPagesViewed;
+};
+
+var getTotalNumberOfPagesForVisitor = function(visitorId) {
+	
+};
+
+var getNumberOfCurrentPages = function() {
+	
+};
+
 var getTrackingObject = function() {
 	return trackingObject;
 };
@@ -138,5 +156,6 @@ exports.getNumOfActiveVisitors = getNumOfActiveVisitors;
 exports.getTrackingObject = getTrackingObject;
 exports.listenToVisitorActivities = recordUserActivities;
 exports.clearTrackingObject = clearTrackingObject;
+exports.getTotalNumberOfPagesViewed = getTotalNumberOfPagesViewed;
 //settings
 exports.setVisitDuration = setVisitDuration;
