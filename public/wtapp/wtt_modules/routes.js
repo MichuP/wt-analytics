@@ -39,8 +39,15 @@ module.exports = function(app, dataObject) {
         }
     });
 
-	app.post('/test-page', function(req, res) {
-    	var name = req.body.name,
-        color = req.body.color;
+	app.post('/thankyou', function(req, res) {
+    	var name = req.body.username,
+        login = req.body.login,
+        password = req.body.password;
+	});
+	
+	app.post('/visitor', function(req, res) {
+    	var login = req.body.login,
+        password = req.body.password;
+        
 	});
 };
