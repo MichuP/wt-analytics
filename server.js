@@ -1,11 +1,16 @@
 var dp = require('./custom_modules/dataProcessing'),
 express = require('express'),
-http = require('http');
+http = require('http'),
+db = require('./public/wtapp/wtt_modules/db');
+
 
 var app = express(),
 server = http.createServer(app).listen(3000, function(){
   console.log('Express server listening on port 3000');
 });
+
+// starting mongodb - connect to wtapp database
+db.openDatabase('mongodb://localhost/wtapp');
 // starting data gathering for server with app
 dp.listenToVisitorActivities(server);
 // set processing of tracking object to fire every 60 secs

@@ -1,4 +1,4 @@
-var wtLogin = require('./login');
+var db = require('./db');
 
 var loginStatus = function (req, res) {
 	if (!req.session.user) {
@@ -38,14 +38,35 @@ module.exports = function(app, dataObject) {
         						 authenticated: true});
         }
     });
+    
+    app.get('/wtapp/signup', function(req, res) {
+        	res.render('signup', {status: ''});
+    });
 
-	app.post('/thankyou', function(req, res) {
+	app.post('/wtapp/thankyou', function(req, res) {
     	var name = req.body.username,
         login = req.body.login,
         password = req.body.password;
+        
+		function redirectOnRegistrationResultReady(regResult) {
+			if (regResult.type == 'username taken') {
+        		res.render('signup', {status: 'Username ' + name + " is already taken. Please select another one."});
+        	}
+        	else if (regResult.type == 'error') {
+        		res.redirect('/wtapp/error.html');
+        	}
+        	else {
+        		res.render('thankyou', {login: login});
+        	}	
+		};
+		
+		db.checkRegistrationData("mongodb://localhost/wtapp", {name: name, login: login, password: password}, redirectOnRegistrationResultReady);
+        //console.log(result + ' ');// + result.type);
+        //console.log(db.registrationResult + ' ' + db.registrationResult.type);
+        
 	});
 	
-	app.post('/visitor', function(req, res) {
+	app.post('/wtapp/visitor', function(req, res) {
     	var login = req.body.login,
         password = req.body.password;
         
