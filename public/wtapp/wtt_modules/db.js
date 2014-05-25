@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
-var registrationResult = {};
 var User = {};
+var registrationResult = {};
 
 var openDatabase = function(database) {
     mongoose.connect(database);
@@ -19,10 +19,6 @@ var openDatabase = function(database) {
         });
     }
     User = mongoose.model('User', UserSchema);
-};
-
-var checkLogin = function(database, credentials) {
-   
 };
 
 var checkRegistrationData = function(database, credentials, callback) {
@@ -46,7 +42,6 @@ var checkRegistrationData = function(database, credentials, callback) {
           		callback(registrationResult);
           	}
           	else {
-          		console.log(user.username + ' ' + user.password + ' ' + user.registryDate + ' ' + user.lastLogin );
           		registrationResult.type = 'username taken';
           		registrationResult.message = 'Username ' + credentials.name + ' is already taken.';
           		callback(registrationResult);
@@ -54,7 +49,10 @@ var checkRegistrationData = function(database, credentials, callback) {
     	}); 
 };
 
+var checkLoginData = function(database, credentials) {
+	
+};
+
 exports.openDatabase = openDatabase;
-exports.checkLogin = checkLogin;
-exports.checkRegistrationData = checkRegistrationData;
-exports.registrationResult = registrationResult;	
+exports.checkLogin = checkLoginData;
+exports.checkRegistrationData = checkRegistrationData;	

@@ -6,7 +6,7 @@
 	<BODY BGCOLOR="FFFFFF">
 		<%if (authenticated == false ) { %>
 
-		<form method="post" action="/wtapp/visitor">
+		<form method="post" id="loginForm" action="/wtapp/visitor">
 			<p>
 				<input type="text" name="login" value="" placeholder="Email">
 			</p>
@@ -22,13 +22,15 @@
 				<input type="submit" name="commit" value="Login">
 			</p>
 		</form>
+		<p id="signupResult"></p>
+		
 		<% } %>
 		
 		<%if (authenticated == true ) { %>
 			Hi <%=login %>! Go to <a href="/wtapp/index">WebTracker homepage</a> to get started!	
 		<% } %>
 		
-		<a href="/wtapp/signup">Registration page</a>
+		<a href="/wtapp/signup.html">Registration page</a>
 			
 	</BODY>
 </HTML>

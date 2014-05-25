@@ -38,10 +38,6 @@ module.exports = function(app, dataObject) {
         						 authenticated: true});
         }
     });
-    
-    app.get('/wtapp/signup', function(req, res) {
-        	res.render('signup', {status: ''});
-    });
 
 	app.post('/wtapp/thankyou', function(req, res) {
     	var name = req.body.username,
@@ -50,7 +46,12 @@ module.exports = function(app, dataObject) {
         
 		function redirectOnRegistrationResultReady(regResult) {
 			if (regResult.type == 'username taken') {
-        		res.render('signup', {status: 'Username ' + name + " is already taken. Please select another one."});
+        		
+  				//res.send({ msg: JSON.stringify({message:'Username is already taken! Try another one.'}) });
+        		res.redirect('/wtapp/signup.html');
+        		res.contentType('json');
+  				res.json(JSON.stringify({message:'Username is already taken! Try another one.'}));
+        		
         	}
         	else if (regResult.type == 'error') {
         		res.redirect('/wtapp/error.html');
@@ -61,9 +62,6 @@ module.exports = function(app, dataObject) {
 		};
 		
 		db.checkRegistrationData("mongodb://localhost/wtapp", {name: name, login: login, password: password}, redirectOnRegistrationResultReady);
-        //console.log(result + ' ');// + result.type);
-        //console.log(db.registrationResult + ' ' + db.registrationResult.type);
-        
 	});
 	
 	app.post('/wtapp/visitor', function(req, res) {
