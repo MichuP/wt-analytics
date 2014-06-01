@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var User = {};
-var registrationResult = {};
 
 var openDatabase = function(database) {
     mongoose.connect(database);
@@ -22,6 +21,7 @@ var openDatabase = function(database) {
 };
 
 var checkRegistrationData = function(database, credentials, callback) {
+    	var registrationResult = {};
     	User.findOne({ 'username': credentials.name}, 'username login password registryDate lastLogin', function (err, user) {
           	if (err) {
           		registrationResult.type = 'failure';

@@ -48,9 +48,10 @@ module.exports = function(app, dataObject) {
 			if (regResult.type == 'username taken') {
         		
   				//res.send({ msg: JSON.stringify({message:'Username is already taken! Try another one.'}) });
-        		res.redirect('/wtapp/signup.html');
         		res.contentType('json');
+  				//console.log("sending message " + res.json);
   				res.json(JSON.stringify({message:'Username is already taken! Try another one.'}));
+  				res.redirect('/wtapp/signup.html');
         		
         	}
         	else if (regResult.type == 'error') {
